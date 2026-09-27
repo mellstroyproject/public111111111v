@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Игровой сервер</title>
+<style>
+:root{color-scheme:dark;--bg:#0f0e17;--panel:#1a1a2a;--panel2:#22223a;--line:#2b2b45;--tx:#f2f2fa;--mut:#8b8ba7;--acc:#4a6cf7;--red:#e5484d;--gold:#f5a524}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.4 "Segoe UI",system-ui,sans-serif;min-height:100vh}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border-radius:16px;margin:16px auto;max-width:1280px;padding:10px 16px}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--acc);display:grid;place-items:center;font-weight:800}
+.stat{font-size:12px;color:var(--mut);line-height:1.5}
+nav{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+nav button{padding:10px 16px;border-radius:12px;font-weight:600}
+nav button.on,nav button:hover{background:var(--panel2)}
+.tag{background:var(--red);border-radius:6px;font-size:11px;padding:1px 6px;margin-left:6px}
+.right{display:flex;gap:8px;align-items:center;position:relative}
+.promo-wrap{position:relative}
+.chip{background:var(--panel2);border-radius:12px;padding:10px 14px;font-weight:600}
+.steam{background:var(--acc);border-radius:12px;padding:10px 18px;font-weight:700}
+.demo{font-size:12px;color:var(--mut);text-decoration:underline}
+.ava{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#4a6cf7,#9b5cf6) center/cover no-repeat;border:0}
+.promo-btn{background:var(--panel2);border-radius:12px;padding:10px 14px;font-weight:600}
+.promo-pop{position:absolute;top:52px;right:0;background:var(--panel2);border-radius:12px;padding:14px;min-width:240px;z-index:6;box-shadow:0 8px 24px #0008;display:flex;flex-direction:column;gap:8px}
+.promo-pop input{width:100%}
+.promo-pop button{background:var(--acc);border-radius:10px;padding:9px 0;font-weight:700}
+.promo-msg{font-size:13px;min-height:16px}
+.promo-msg.ok{color:#4ade80}.promo-msg.err{color:var(--red)}
+.menu{position:absolute;top:52px;right:0;background:var(--panel2);border-radius:12px;padding:8px;min-width:190px;z-index:5;box-shadow:0 8px 24px #0008}
+.menu-role{color:var(--gold);font-size:12px;font-weight:700;padding:6px 12px 4px}
+.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:8px}
+.menu button:hover{background:var(--line)}
+.admin-badge{background:var(--gold);color:#1a1200;border-radius:6px;font-size:11px;font-weight:700;padding:2px 8px;margin-left:10px}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px}
+.admin-card{background:var(--panel);border-radius:12px;padding:18px}
+.admin-card .n{font-size:26px;font-weight:800}
+.admin-card .l{color:var(--mut);font-size:13px;margin-top:4px}
+.admin-tools{background:var(--panel);border-radius:12px;padding:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px}
+.admin-tools input{flex:1;min-width:200px}
+.admin-tools button{background:var(--panel2);border-radius:10px;padding:10px 16px;font-weight:600}
+.admin-tools button.danger{background:var(--red)}
+main{max-width:1280px;margin:0 auto 60px;padding:0 16px}
+h1{font-size:28px;margin:24px 0 20px}
+.cards{display:flex;justify-content:center}
+.mode{width:min(100%,320px);height:460px;border-radius:16px;background:linear-gradient(180deg,#1c1c2e,#12121e);border:1px solid var(--line);display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:28px;gap:10px;cursor:pointer;transition:transform .2s}
+.mode:hover{transform:translateY(-4px)}
+.mode b{font-size:40px;letter-spacing:.5px}
+.online{background:var(--panel2);border-radius:20px;padding:4px 14px;font-size:13px;color:var(--mut)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-left:6px}
+table{width:100%;border-collapse:separate;border-spacing:0 8px}
+th{font-weight:500;color:var(--mut);font-size:13px;text-align:left;padding:4px 16px}
+td{background:var(--panel);padding:14px 16px}
+td:first-child{border-radius:12px 0 0 12px}td:last-child{border-radius:0 12px 12px 0}
+.tabs{display:inline-flex;background:var(--panel);border-radius:12px;padding:4px;gap:4px;margin-bottom:12px}
+.tabs button{padding:9px 18px;border-radius:9px;font-weight:600;color:var(--mut)}
+.tabs button.on{background:var(--panel2);color:var(--tx)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+input{background:var(--panel);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:10px 14px;font:inherit;min-width:240px}
+.prem{background:var(--acc);border-radius:6px;font-size:11px;font-weight:700;padding:2px 8px;margin-right:8px}
+.ban{color:var(--red)}.ok{color:#4ade80}
+.plans{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.plan{width:min(100%,360px);border-radius:16px;padding:24px;background:var(--panel);border:1px solid var(--line)}
+.plan.p{border-color:var(--acc);background:linear-gradient(180deg,#1b2246,var(--panel))}
+.plan.g{border-color:var(--gold);background:linear-gradient(180deg,#3a2c14,var(--panel))}
+.plan h2{font-size:26px;margin-bottom:16px}
+.plan li{list-style:none;background:#ffffff0d;border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.plan li:before{content:"✓";color:var(--acc);margin-right:10px}
+.plan.g li:before{color:var(--gold)}
+.periods{display:flex;gap:4px;margin:14px 0}
+.periods button{flex:1;padding:8px 0;border-radius:8px;background:#ffffff0d;font-size:13px}
+.periods button.on{background:var(--acc)}
+.price{font-size:26px;font-weight:800;margin-bottom:12px}
+.buy{width:100%;padding:12px;border-radius:12px;background:var(--acc);font-weight:700}
+.plan.g .buy{background:var(--gold);color:#1a1200}
+.rules{display:grid;grid-template-columns:230px 1fr;gap:16px}
+.side{background:var(--panel);border-radius:12px;padding:8px;align-self:start}
+.side button{display:block;width:100%;text-align:left;padding:12px;border-radius:8px;color:var(--mut)}
+.side button.on{background:var(--panel2);color:var(--tx)}
+.empty{background:var(--panel);border-radius:12px;padding:28px;color:var(--mut)}
+.join{background:var(--acc);border-radius:10px;padding:8px 16px;font-weight:600}
+@media(max-width:760px){.rules{grid-template-columns:1fr}nav{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">S</div>
+  <div class="stat">Админов: 37<br>Игроков: 376</div>
+  <nav id="nav"></nav>
+  <div class="right" id="right"></div>
+</header>
+<main id="app"></main>
+<script>
+const $=s=>document.querySelector(s);
+const st={page:'home',lb:'exp',bt:'bans',plan:{prem:0,plus:0},rule:0,user:null,menu:false,promoOpen:false,promo:'',promoMsg:null};
+
+// Промокоды: временный список для примера, лучше хранить и проверять на сервере,
+// иначе любой посмотрит код прямо в исходнике страницы.
+const PROMO_CODES={
+  'START100':{coins:100,text:'+100 монет'},
+  'WELCOME50':{coins:50,text:'+50 монет'},
+  'MELLSTROYPROJECT':{coins:200,text:'+200 монет'}
+};
+const usedPromoKey='usedPromoCodes';
+function getUsedPromo(){try{return JSON.parse(localStorage.getItem(usedPromoKey)||'[]')}catch(e){return []}}
+function togglePromo(){st.promoOpen=!st.promoOpen;st.menu=false;st.promoMsg=null;draw()}
+function buyPlan(key,name){
+  if(!st.user){alert('Сначала войдите через Steam, чтобы купить');return}
+  const cost=price[key][st.plan[key]];
+  const bal=st.user.coins||0;
+  if(bal<cost){alert(`Недостаточно средств: не хватает ${(cost-bal).toFixed(2)} ₽. Пополните баланс или используйте промокод.`);return}
+  st.user.coins=bal-cost;
+  alert(`Покупка успешна: ${name} на ${periods[st.plan[key]]}`);
+  draw();
+}
+function activatePromo(){
+  if(!st.user){st.promoMsg={ok:false,text:'Сначала войдите через Steam'};draw();return}
+  const code=st.promo.trim().toUpperCase();
+  if(!code){st.promoMsg={ok:false,text:'Введите код'};draw();return}
+  const used=getUsedPromo();
+  if(used.includes(code)){st.promoMsg={ok:false,text:'Этот код уже был использован'};draw();return}
+  const found=PROMO_CODES[code];
+  if(!found){st.promoMsg={ok:false,text:'Код не найден'};draw();return}
+  st.user.coins=(st.user.coins||0)+found.coins;
+  used.push(code);
+  try{localStorage.setItem(usedPromoKey,JSON.stringify(used))}catch(e){}
+  st.promo='';
+  st.promoMsg={ok:true,text:`Код активирован: ${found.text}`};
+  draw();
+}
+// Владелец сервера: этот SteamID64 всегда получает права главного админа.
+// https://steamcommunity.com/profiles/76561198659672678
+const OWNER_STEAM_ID='76561198659672678';
+function applyRole(u){u.isAdmin=u.id===OWNER_STEAM_ID;u.role=u.isAdmin?'Владелец':null;return u}
+
+const PAGES=[['home','Играть'],['shop','Магазин'],['leaders','Лидеры'],['bans','Баны'],['rules','Правила']];
+
+// Steam: если Steam вернул пользователя с openid-параметрами, читаем SteamID.
+// ВАЖНО: проверить подпись (openid.sig) нужно на сервере, иначе вход можно подделать.
+try{const q=new URLSearchParams(location.search),c=q.get('openid.claimed_id');
+ if(c&&/\/openid\/id\/(\d+)$/.test(c)){
+   st.user=applyRole({id:RegExp.$1,name:'Игрок',coins:15,avatar:null});
+   // OpenID отдаёт только SteamID64, но не имя и не аватарку.
+   // Чтобы получить реальную аватарку, нужен запрос на backend, который
+   // сам сходит в Steam Web API (ISteamUser/GetPlayerSummaries) со своим
+   // ключом — из браузера так сделать нельзя (ключ светился бы всем, и Steam
+   // не пускает такие запросы через CORS). Пример:
+   fetchSteamProfile(st.user.id);
+ }}catch(e){}
+
+function fetchSteamProfile(steamid){
+  // Замени URL на свой backend-эндпоинт, который вернёт {name, avatar} для steamid.
+  fetch('/api/steam-profile?steamid='+encodeURIComponent(steamid))
+    .then(r=>r.ok?r.json():null)
+    .then(data=>{ if(data&&st.user){ st.user.name=data.name||st.user.name; st.user.avatar=data.avatar||st.user.avatar; draw(); } })
+    .catch(()=>{});
+}
+
+function steamLogin(){
+  const p=new URLSearchParams({'openid.ns':'http://specs.openid.net/auth/2.0','openid.mode':'checkid_setup',
+   'openid.return_to':location.origin+location.pathname,'openid.realm':location.origin,
+   'openid.identity':'http://specs.openid.net/auth/2.0/identifier_select','openid.claimed_id':'http://specs.openid.net/auth/2.0/identifier_select'});
+  location.href='https://steamcommunity.com/openid/login?'+p;
+}
+function go(p){st.page=p;st.menu=false;draw()}
+
+const servers=[['Public #1','de_dust2',32,32,21],['Public #2','de_mirage',30,32,25],['Public #3','de_inferno',28,32,19],['Public #4','de_nuke',24,32,30],['Public #5','de_ancient',22,32,27]];
+const leaders={exp:[['Игрок 1','483 039','51 462','1.65','493 ч.'],['Игрок 2','381 447','45 760','2.73','485 ч.'],['Игрок 3','366 928','49 153','1.30','1007 ч.'],['Игрок 4','348 826','33 100','2.53','436 ч.'],['Игрок 5','332 129','36 242','1.43','467 ч.']],
+ drop:[['Игрок 6','128','—','—','310 ч.'],['Игрок 7','97','—','—','254 ч.'],['Игрок 8','85','—','—','402 ч.']]};
+const bans=[['Игрок A','Админ 1','Использование читов',1,'2 месяца','19.09.2026, 00:05'],['Игрок B','Админ 2','Отказ от проверки',1,'1 месяц','19.09.2026, 00:05'],['Игрок C','Админ 1','Использование читов',0,'2 месяца','19.09.2026, 00:03']];
+const mutes=[['Игрок D','Админ 3','Оскорбления в чате',1,'1 день','19.09.2026, 00:10'],['Игрок E','Админ 2','Спам в голосовом чате',1,'3 дня','18.09.2026, 23:40']];
+const prem=['Больше денег в начале раунда','Выделение в чате и серверов','Прокачка опыта x2','Резервный слот для подключения','Улучшенный дроп скинов'];
+const plus=['Все возможности премиума','Заглушить игрока','Заморозить игрока','Ослепить игрока','Убить игрока','Изменить урон игроку','Изменить здоровье игроку','Отключить прыжок игроку'];
+const periods=['7 дней','30 дней','90 дней','180 дней'];
+const price={prem:[65,200,470,840],plus:[150,450,1000,1800]}; // временные цены, замени на свои
+const rcats=['Основные','Общение','Игровой процесс','Никнеймы и аватарки','Прочее','Для администрации','Условия проверки'];
+
+function head(){
+  $('#nav').innerHTML=PAGES.map(([k,t])=>`<button class="${st.page===k||(k==='home'&&st.page==='public')?'on':''}" onclick="go('${k}')">${t}${k==='shop'?'<span class="tag">-50%</span>':''}</button>`).join('');
+  $('#right').innerHTML=st.user?`<span class="chip">${(st.user.coins||0).toFixed(2)} +</span>`+
+   `<div class="promo-wrap"><button class="promo-btn" onclick="togglePromo()">Промокод</button>`+
+   (st.promoOpen?`<div class="promo-pop"><input value="${st.promo}" oninput="st.promo=this.value" onkeydown="if(event.key==='Enter')activatePromo()" placeholder="Введите код" aria-label="Промокод" autofocus><button onclick="activatePromo()">Активировать</button><div class="promo-msg ${st.promoMsg?(st.promoMsg.ok?'ok':'err'):''}">${st.promoMsg?st.promoMsg.text:''}</div></div>`:'')+
+   `</div>`+
+   `<button class="ava" aria-label="Профиль" style="${st.user.avatar?`background-image:url('${st.user.avatar}')`:''}" onclick="st.menu=!st.menu;st.promoOpen=false;head()"></button>`+
+   (st.menu?`<div class="menu">${st.user.role?`<div class="menu-role">${st.user.role}</div>`:''}${(st.user.isAdmin?['Админ-панель']:[]).concat(['Профиль','Скинченджер','Хранилище','Настройки']).map(x=>`<button onclick="${x==='Админ-панель'?"go('admin')":'st.menu=false;head()'}">${x}</button>`).join('')}<button onclick="st.user=null;st.menu=false;draw()">Выйти</button></div>`:'')
+   :`<button class="steam" onclick="steamLogin()">Войти через Steam</button><a class="demo" href="#" onclick="st.user=applyRole({id:OWNER_STEAM_ID,name:'Демо',coins:15,avatar:'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg'});draw();return false">демо</a>`;
+}
+function view(){
+  if(st.page==='admin'&&!(st.user&&st.user.isAdmin)){st.page='home'}
+  if(st.page==='home') return `<div class="cards"><div class="mode" onclick="go('public')" role="button" tabindex="0"><b>PUBLIC</b><span class="online">Онлайн: 256<i class="dot"></i></span></div></div>`;
+  if(st.page==='public') return `<h1>Public: серверы</h1><table><tr><th>Сервер</th><th>Карта</th><th>Игроки</th><th>Пинг</th><th></th></tr>${servers.map(s=>`<tr><td>${s[0]}</td><td>${s[1]}</td><td>${s[2]}/${s[3]}</td><td>${s[4]} мс</td><td><button class="join" onclick="alert('Здесь будет подключение: steam://connect/IP:порт')">Играть</button></td></tr>`).join('')}</table><p class="stat">Адреса и названия серверов временные.</p>`;
+  if(st.page==='shop') return `<h1 style="text-align:center">Магазин</h1><div class="plans">${[['prem','Премиум',prem,'p'],['plus','Админ+',plus,'g']].map(([k,n,l,c])=>`<div class="plan ${c}"><h2>${n}</h2><ul>${l.map(x=>`<li>${x}</li>`).join('')}</ul><div class="periods">${periods.map((p,i)=>`<button class="${st.plan[k]===i?'on':''}" onclick="st.plan.${k}=${i};draw()">${p}</button>`).join('')}</div><div class="price">${price[k][st.plan[k]]} ₽</div><button class="buy" onclick="buyPlan('${k}','${n}')">Купить</button></div>`).join('')}</div>`;
+  if(st.page==='leaders'){const rows=leaders[st.lb];return `<h1>Лидеры</h1><div class="bar"><div class="tabs"><button class="${st.lb==='exp'?'on':''}" onclick="st.lb='exp';draw()">По опыту</button><button class="${st.lb==='drop'?'on':''}" onclick="st.lb='drop';draw()">По дропу</button></div><input placeholder="Поиск по нику / SteamID..." aria-label="Поиск"></div><table><tr><th>Место</th><th>Игрок</th><th>Очков</th><th>Убийств</th><th>У/С</th><th>Время игры</th></tr>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${i<2&&st.lb==='exp'?'<span class="prem">ПРЕМИУМ</span>':''}${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join('')}</table>`}
+  if(st.page==='bans'){const rows=st.bt==='bans'?bans:mutes;return `<h1>Баны</h1><div class="bar"><div class="tabs"><button class="${st.bt==='bans'?'on':''}" onclick="st.bt='bans';draw()">Баны</button><button class="${st.bt==='mutes'?'on':''}" onclick="st.bt='mutes';draw()">Муты</button></div><input placeholder="Поиск по нику / SteamID..." aria-label="Поиск"></div><table><tr><th>Игрок</th><th>Админ</th><th>Причина</th><th>Статус</th><th>Срок</th><th>Дата</th></tr>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="${r[3]?'ban':'ok'}">${r[3]?(st.bt==='bans'?'Забанен':'Замучен'):'Разбанен'}</td><td>${r[4]}</td><td>${r[5]}</td></tr>`).join('')}</table>`}
+  if(st.page==='rules') return `<h1>Правила</h1><div class="rules"><div class="side">${rcats.map((c,i)=>`<button class="${st.rule===i?'on':''}" onclick="st.rule=${i};draw()">${c}</button>`).join('')}</div><div class="empty">Раздел «${rcats[st.rule]}»: текст правил добавим позже.</div></div>`;
+  if(st.page==='admin') return `<h1>Админ-панель<span class="admin-badge">${st.user.role}</span></h1>
+   <div class="admin-grid">
+     <div class="admin-card"><div class="n">376</div><div class="l">Игроков онлайн</div></div>
+     <div class="admin-card"><div class="n">37</div><div class="l">Админов в сети</div></div>
+     <div class="admin-card"><div class="n">${bans.filter(b=>b[3]).length}</div><div class="l">Активных банов</div></div>
+     <div class="admin-card"><div class="n">${mutes.filter(m=>m[3]).length}</div><div class="l">Активных мутов</div></div>
+   </div>
+   <div class="admin-tools"><input id="adminTarget" placeholder="Ник или SteamID игрока" aria-label="Игрок">
+     <button onclick="adminAction('Кикнут')">Кикнуть</button>
+     <button onclick="adminAction('Замьючен')">Замьютить</button>
+     <button class="danger" onclick="adminAction('Забанен')">Забанить</button>
+   </div>
+   <p class="stat">Панель — заготовка для интерфейса: реальные баны/муты/кики нужно подключить к серверу игры и базе данных.</p>`;
+}
+function adminAction(verb){
+  const t=($('#adminTarget')?.value||'').trim();
+  if(!t){alert('Укажите ник или SteamID игрока');return}
+  alert(`${t}: ${verb.toLowerCase()}`);
+}
+function draw(){head();$('#app').innerHTML=view()}
+draw();
+</script>
+</body>
+</html>
